@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.ObjectUtils;
@@ -20,8 +21,6 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenProvider jwtTokenProvider;
 
     private final RedisTemplate redisTemplate;
-    private final static String HEADER_AUTHORIZATION = "Authorization";
-    private final static String TOKEN_PREFIX = "Bearer ";
 
     //요청이 오면 헤더값을 비교해서 토큰유무 및 유효성 체크
     @Override
@@ -30,7 +29,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
         //요청 헤더의 Authorization 키의 값 조회
-        String authorizationHeader = request.getHeader(HEADER_AUTHORIZATION);
+        String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         String token = jwtTokenProvider.getToken(authorizationHeader);
 
         //토큰 유효성 검사
@@ -50,12 +49,12 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private String getAccessToken(String authorizationHeader){
-        //JWT가 Bearer 시작한다면 Bearer 빼고 return
-        if(authorizationHeader != null && authorizationHeader.startsWith(TOKEN_PREFIX)){
-            return authorizationHeader.substring(TOKEN_PREFIX.length());
-        }
-        return null;
-    }
+//    private String getAccessToken(String authorizationHeader){
+//        //JWT가 Bearer 시작한다면 Bearer 빼고 return
+//        if(authorizationHeader != null && authorizationHeader.startsWith(TOKEN_PREFIX)){
+//            return authorizationHeader.substring(TOKEN_PREFIX.length());
+//        }
+//        return null;
+//    }
 
 }
