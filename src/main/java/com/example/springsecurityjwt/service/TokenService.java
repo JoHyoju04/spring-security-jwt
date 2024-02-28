@@ -5,6 +5,7 @@ import com.example.springsecurityjwt.model.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.Duration;
 import java.util.Optional;
@@ -20,7 +21,7 @@ public class TokenService {
 
     public String createNewAccessToken(String refreshToken) {
         // 토큰 유효성 검사에 실패하면 예외 발생(만료되었는지, 시그니처 체크)
-        if(!jwtTokenProvider.validToken(refreshToken)) {
+        if(StringUtils.hasText(refreshToken) && !jwtTokenProvider.validToken(refreshToken)) {
             throw new IllegalArgumentException("Unexpected token");
         }
 

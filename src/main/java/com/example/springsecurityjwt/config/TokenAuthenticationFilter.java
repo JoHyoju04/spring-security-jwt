@@ -38,7 +38,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             String isLogout = (String) redisTemplate.opsForValue().get(token);
 
             //로그아웃 하지 않은 경우
-            if(ObjectUtils.isEmpty(isLogout)){
+            if(StringUtils.hasText(isLogout)){
                 //토큰으로부터 유저 정보 가져오기
                 Authentication authentication = jwtTokenProvider.getAuthentication(token);
                 // SecurityContext 에 Authentication 객체를 저장
