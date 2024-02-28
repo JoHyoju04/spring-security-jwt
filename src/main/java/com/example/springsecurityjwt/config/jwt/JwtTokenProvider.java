@@ -26,7 +26,7 @@ public class JwtTokenProvider {
 
     private final RedisTemplate redisTemplate;
 
-    private final static String TOKEN_PREFIX = "Bearer ";
+    public final static String TOKEN_PREFIX = "Bearer ";
 
     public String generateToken(User user, Duration expiredAt){
         Date now = new Date();

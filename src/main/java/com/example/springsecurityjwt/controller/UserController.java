@@ -18,9 +18,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.concurrent.TimeUnit;
+
+import static com.example.springsecurityjwt.config.jwt.JwtTokenProvider.TOKEN_PREFIX;
 
 @RequiredArgsConstructor
 @RestController
@@ -43,21 +46,21 @@ public class UserController {
         //이메일과 비밀번호로 user 조회
         User user = userService.signIn(req);
 
-        //access token 발급 및 쿠키에 담기
+        //access token 발급
         String accessToken = jwtTokenProvider.generateToken(user, jwtProperties.getAccessTokenExpiration());
 
-        //refresh token 발급, DB에 저장, 쿠키에 담기
+        //refresh token 발급
         String refreshToken = jwtTokenProvider.generateToken(user, jwtProperties.getRefreshTokenExpiration());
 
         //redis에 RT:test@gmail.com(key) / 23jijiofj2io3hi32hiongiodsninioda(value) 형태로 리프레시 토큰 저장하기
-        //REFRESH_TOKEN_DURATION 초후에 만료된다(상대적인 시간)
+        //REFRESH_TOKEN_DURATION 초 후에 만료된다(상대적인 시간)
         redisTemplate.opsForValue().set(refreshToken, String.valueOf(user.getId()), (int) jwtProperties.getAccessTokenExpiration().toSeconds(), TimeUnit.SECONDS);
 
         // JWT 토큰을 응답 헤더에 넣어서 클라이언트에게 전달
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
-                .header("Refresh-Token", "Bearer " + refreshToken)
+                .header(HttpHeaders.AUTHORIZATION, TOKEN_PREFIX + accessToken)
+                .header("Refresh-Token", TOKEN_PREFIX + refreshToken)
                 .build();
 
     }
