@@ -3,12 +3,10 @@ package com.example.springsecurityjwt.service;
 import com.example.springsecurityjwt.config.jwt.JwtTokenProvider;
 import com.example.springsecurityjwt.model.entity.User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.time.Duration;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service

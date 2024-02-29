@@ -1,11 +1,10 @@
 package com.example.springsecurityjwt.service;
 
 import com.example.springsecurityjwt.model.entity.User;
-import com.example.springsecurityjwt.model.req.ReqUserSignUp;
 import com.example.springsecurityjwt.model.req.ReqUserSignIn;
+import com.example.springsecurityjwt.model.req.ReqUserSignUp;
 import com.example.springsecurityjwt.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
