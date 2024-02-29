@@ -16,9 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.concurrent.TimeUnit;
@@ -34,7 +32,7 @@ public class UserController {
     private final JwtProperties jwtProperties;
 
     @PostMapping("/signup")
-    public ResponseEntity<Object> signUp(@RequestBody ReqUserSignUp request){
+    public ResponseEntity<Object> signUp(@RequestBody @Valid ReqUserSignUp request){
         userService.save(request);
 
         return new ResponseEntity<>(HttpStatus.OK);
@@ -66,7 +64,7 @@ public class UserController {
     }
 
     @PostMapping(value = "/signout" )
-    public ResponseEntity<Object> logout(@RequestHeader("Authorization") String header, @AuthenticationPrincipal User user, @RequestBody ReqDeleteRefreshToken req){
+    public ResponseEntity<Object> logout(@RequestHeader("Authorization") String header, @RequestBody @Valid ReqDeleteRefreshToken req){
 
         String refreshToken = req.getRefreshToken();
 
