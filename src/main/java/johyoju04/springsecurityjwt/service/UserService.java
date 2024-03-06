@@ -19,7 +19,7 @@ public class UserService {
         BCryptPasswordEncoder encoder = bCryptPasswordEncoder;
 
         User user = findByEmail(req.getEmail());
-        if (!encoder.matches(req.getPw(), user.getPassword())) {
+        if (!encoder.matches(req.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("Unexpected user");
         }
         return user;

@@ -13,5 +13,5 @@ public class ReqUserSignIn {
     private String email;
 
     @NotBlank
-    private String pw;
+    private String password;
 }
