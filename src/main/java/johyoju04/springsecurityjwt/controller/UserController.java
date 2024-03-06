@@ -7,6 +7,7 @@ import johyoju04.springsecurityjwt.service.UserService;
 import johyoju04.springsecurityjwt.config.jwt.JwtTokenProvider;
 import johyoju04.springsecurityjwt.model.entity.User;
 import johyoju04.springsecurityjwt.model.req.ReqUserSignIn;
+import johyoju04.springsecurityjwt.model.res.ResToken;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -20,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.concurrent.TimeUnit;
 
-import static johyoju04.springsecurityjwt.config.jwt.JwtTokenProvider.TOKEN_PREFIX;
 
 @RequiredArgsConstructor
 @RestController
@@ -40,7 +40,7 @@ public class UserController {
 
 
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> signIn(@RequestBody @Valid ReqUserSignIn req){
+    public ResponseEntity<ResToken> signIn(@RequestBody @Valid ReqUserSignIn req){
         //이메일과 비밀번호로 user 조회
         User user = userService.signIn(req);
 
@@ -54,13 +54,11 @@ public class UserController {
         //REFRESH_TOKEN_DURATION 초 후에 만료된다(상대적인 시간)
         redisTemplate.opsForValue().set(refreshToken, String.valueOf(user.getId()), (int) jwtProperties.getAccessTokenExpiration().toSeconds(), TimeUnit.SECONDS);
 
-        // JWT 토큰을 응답 헤더에 넣어서 클라이언트에게 전달
+        ResToken resToken = new ResToken(accessToken,refreshToken,"Bearer");
 
+        // JWT 토큰을 응답 바디에 넣어서 클라이언트에게 전달
         return ResponseEntity.ok()
-                .header(HttpHeaders.AUTHORIZATION, TOKEN_PREFIX + accessToken)
-                .header("Refresh-Token", TOKEN_PREFIX + refreshToken)
-                .build();
-
+                .body(resToken);
     }
 
     @PostMapping(value = "/signout" )
