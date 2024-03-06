@@ -46,7 +46,7 @@ public class SecurityConfig {
 
 
         http.authorizeRequests()
-                .requestMatchers("/token","/login","/signup").permitAll()
+                .requestMatchers("/api/token","/api/login","/api/signup").permitAll()
                 .requestMatchers("/**").authenticated()
                 .anyRequest().permitAll();
 
