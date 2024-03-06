@@ -24,6 +24,7 @@ import static johyoju04.springsecurityjwt.config.jwt.JwtTokenProvider.TOKEN_PREF
 
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("/api")
 public class UserController {
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
