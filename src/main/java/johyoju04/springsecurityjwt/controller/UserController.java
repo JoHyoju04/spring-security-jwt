@@ -61,7 +61,7 @@ public class UserController {
                 .body(resToken);
     }
 
-    @PostMapping(value = "/signout" )
+    @PostMapping(value = "/logout" )
     public ResponseEntity<Object> logout(@RequestHeader("Authorization") String header, @RequestBody @Valid ReqDeleteRefreshToken req){
 
         String refreshToken = req.getRefreshToken();
@@ -71,7 +71,6 @@ public class UserController {
 
         // SecurityContext 초기화하여 현재 세션 무효화
         SecurityContextHolder.clearContext();
-
 
         String accessToken = jwtTokenProvider.getToken(header);
 
