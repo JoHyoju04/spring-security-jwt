@@ -9,4 +9,5 @@ import lombok.Setter;
 public class ReqDeleteRefreshToken {
     @NotBlank
     private String refreshToken;
+    private String tokenType;
 }

@@ -25,7 +25,7 @@ public class TokenController {
         String newAccessToken = tokenService.createNewAccessToken(req.getRefreshToken());
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new ResAccessToken(newAccessToken));
+                .body(new ResAccessToken(newAccessToken,"Bearer"));
     }
 
 }

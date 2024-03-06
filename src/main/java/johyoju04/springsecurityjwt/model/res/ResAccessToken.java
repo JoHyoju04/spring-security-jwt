@@ -7,4 +7,5 @@ import lombok.Getter;
 @AllArgsConstructor
 public class ResAccessToken {
     private String accessToken;
+    private String tokenType;
 }
