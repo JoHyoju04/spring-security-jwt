@@ -107,7 +107,7 @@ public class JwtTokenProvider {
 
     public Long getUserIdFromRedis(String token){
 
-        Optional<Long> optionalValue = Optional.ofNullable((Long) redisTemplate.opsForValue().get(token));
+        Optional<Long> optionalValue = Optional.ofNullable(Long.valueOf((String) redisTemplate.opsForValue().get(token)));
         return optionalValue.orElseThrow(() -> new IllegalArgumentException("refresh key에 대한 값이 없습니다."));
     }
 }
