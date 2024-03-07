@@ -3,6 +3,7 @@ package johyoju04.springsecurityjwt.controller;
 import johyoju04.springsecurityjwt.config.jwt.JwtProperties;
 import johyoju04.springsecurityjwt.model.req.ReqDeleteRefreshToken;
 import johyoju04.springsecurityjwt.model.req.ReqUserSignUp;
+import johyoju04.springsecurityjwt.model.res.ResUser;
 import johyoju04.springsecurityjwt.service.UserService;
 import johyoju04.springsecurityjwt.config.jwt.JwtTokenProvider;
 import johyoju04.springsecurityjwt.model.entity.User;
@@ -40,7 +41,7 @@ public class UserController {
 
 
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ResToken> signIn(@RequestBody @Valid ReqUserSignIn req){
+    public ResToken signIn(@RequestBody @Valid ReqUserSignIn req){
         //이메일과 비밀번호로 user 조회
         User user = userService.signIn(req);
 
@@ -54,11 +55,8 @@ public class UserController {
         //REFRESH_TOKEN_DURATION 초 후에 만료된다(상대적인 시간)
         redisTemplate.opsForValue().set(refreshToken, String.valueOf(user.getId()), (int) jwtProperties.getAccessTokenExpiration().toSeconds(), TimeUnit.SECONDS);
 
-        ResToken resToken = new ResToken(accessToken,refreshToken,"Bearer");
-
         // JWT 토큰을 응답 바디에 넣어서 클라이언트에게 전달
-        return ResponseEntity.ok()
-                .body(resToken);
+        return ResToken.of(accessToken,refreshToken,"Bearer");
     }
 
     @PostMapping(value = "/logout" )
@@ -83,11 +81,12 @@ public class UserController {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<User> getUser(Authentication authentication){
+    public ResUser getUser(Authentication authentication){
 
         String email = authentication.getName();
+        User user = userService.findByEmail(email);
 
-        return new ResponseEntity<>(userService.findByEmail(email),HttpStatus.OK);
+        return ResUser.of(user.getId(),user.getEmail());
     }
 
 }

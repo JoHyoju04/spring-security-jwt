@@ -1,11 +1,19 @@
 package johyoju04.springsecurityjwt.model.res;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
 public class ResAccessToken {
-    private String accessToken;
-    private String tokenType;
+    private final String accessToken;
+    private final String tokenType;
+
+    private ResAccessToken(String accessToken,String tokenType){
+        this.accessToken = accessToken;
+        this.tokenType = tokenType;
+    }
+
+    public static ResAccessToken of(String accessToken, String tokenType){
+        return new ResAccessToken(accessToken, tokenType);
+    }
+
 }
