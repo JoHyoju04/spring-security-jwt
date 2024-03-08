@@ -1,22 +1,22 @@
 package johyoju04.springsecurityjwt.controller;
 
+import jakarta.validation.Valid;
 import johyoju04.springsecurityjwt.config.jwt.JwtProperties;
-import johyoju04.springsecurityjwt.model.req.ReqDeleteRefreshToken;
-import johyoju04.springsecurityjwt.model.req.ReqUserSignUp;
-import johyoju04.springsecurityjwt.model.res.ResUser;
-import johyoju04.springsecurityjwt.service.UserService;
 import johyoju04.springsecurityjwt.config.jwt.JwtTokenProvider;
 import johyoju04.springsecurityjwt.model.entity.User;
+import johyoju04.springsecurityjwt.model.req.ReqDeleteRefreshToken;
 import johyoju04.springsecurityjwt.model.req.ReqUserSignIn;
+import johyoju04.springsecurityjwt.model.req.ReqUserSignUp;
 import johyoju04.springsecurityjwt.model.res.ResToken;
-import jakarta.validation.Valid;
+import johyoju04.springsecurityjwt.model.res.ResUser;
+import johyoju04.springsecurityjwt.security.UserId;
+import johyoju04.springsecurityjwt.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,7 +33,7 @@ public class UserController {
     private final JwtProperties jwtProperties;
 
     @PostMapping("/signup")
-    public ResponseEntity<Object> signUp(@RequestBody @Valid ReqUserSignUp request){
+    public ResponseEntity<Object> signUp(@RequestBody @Valid ReqUserSignUp request) {
         userService.save(request);
 
         return new ResponseEntity<>(HttpStatus.OK);
@@ -41,7 +41,7 @@ public class UserController {
 
 
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResToken signIn(@RequestBody @Valid ReqUserSignIn req){
+    public ResToken signIn(@RequestBody @Valid ReqUserSignIn req) {
         //이메일과 비밀번호로 user 조회
         User user = userService.signIn(req);
 
@@ -56,12 +56,11 @@ public class UserController {
         redisTemplate.opsForValue().set(refreshToken, String.valueOf(user.getId()), (int) jwtProperties.getAccessTokenExpiration().toSeconds(), TimeUnit.SECONDS);
 
         // JWT 토큰을 응답 바디에 넣어서 클라이언트에게 전달
-        return ResToken.of(accessToken,refreshToken,"Bearer");
+        return ResToken.of(accessToken, refreshToken, "Bearer");
     }
 
-    @PostMapping(value = "/logout" )
-    public ResponseEntity<Object> logout(@RequestHeader("Authorization") String header, @RequestBody @Valid ReqDeleteRefreshToken req){
-
+    @PostMapping(value = "/logout")
+    public ResponseEntity<Object> logout(@RequestHeader("Authorization") String header, @RequestBody @Valid ReqDeleteRefreshToken req) {
         String refreshToken = req.getRefreshToken();
 
         // Redis에서 해당 User email로 저장된 Refresh Token 이 있는지 여부를 확인 후에 있을 경우 삭제를 한다.
@@ -74,19 +73,17 @@ public class UserController {
 
         // 해당 Access Token 유효시간을 가지고 와서 BlackList에 저장하기
         //key,value,timeout,timeunit
-        redisTemplate.opsForValue().set(accessToken,"logout",(int) jwtProperties.getAccessTokenExpiration().toSeconds(),TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(accessToken, "logout", (int) jwtProperties.getAccessTokenExpiration().toSeconds(), TimeUnit.SECONDS);
         return ResponseEntity.ok()
                 .header(HttpHeaders.AUTHORIZATION, "")
                 .build();
     }
 
     @GetMapping("/users")
-    public ResUser getUser(Authentication authentication){
+    public ResUser getUser(@UserId Long userId) {
+        User user = userService.findById(userId);
 
-        String email = authentication.getName();
-        User user = userService.findByEmail(email);
-
-        return ResUser.of(user.getId(),user.getEmail());
+        return ResUser.of(user.getId(), user.getEmail());
     }
 
 }

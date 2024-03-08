@@ -22,7 +22,7 @@ public class TokenController {
     ) {
         String newAccessToken = tokenService.createNewAccessToken(req.getRefreshToken());
 
-        return ResAccessToken.of(newAccessToken,"Bearer");
+        return ResAccessToken.of(newAccessToken, "Bearer");
     }
 
 }

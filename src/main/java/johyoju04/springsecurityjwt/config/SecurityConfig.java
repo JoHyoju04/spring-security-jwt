@@ -1,11 +1,14 @@
 package johyoju04.springsecurityjwt.config;
 
 import johyoju04.springsecurityjwt.config.jwt.JwtTokenProvider;
+import johyoju04.springsecurityjwt.security.AccessTokenAuthenticationProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -22,8 +25,6 @@ import static org.springframework.boot.autoconfigure.security.servlet.PathReques
 @RequiredArgsConstructor
 @Configuration
 public class SecurityConfig {
-    private final JwtTokenProvider jwtTokenProvider;
-    private final RedisTemplate redisTemplate;
 
     @Bean
     public WebSecurityCustomizer configure() {
@@ -33,20 +34,25 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, final JwtTokenProvider jwtTokenProvider, final RedisTemplate redisTemplate) throws Exception {
+
         http.csrf().disable()
                 .httpBasic().disable()
                 .formLogin().disable()
-                        .logout().disable();
+                .logout().disable();
 
         http.sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
-        http.addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        AuthenticationManagerBuilder sharedObject = http.getSharedObject(AuthenticationManagerBuilder.class);
+        sharedObject.authenticationProvider(new AccessTokenAuthenticationProvider(jwtTokenProvider, redisTemplate));
+        AuthenticationManager authenticationManager = sharedObject.build();
+        http.authenticationManager(authenticationManager);
 
+        http.addFilterBefore(tokenAuthenticationFilter(jwtTokenProvider, authenticationManager), UsernamePasswordAuthenticationFilter.class);
 
         http.authorizeRequests()
-                .requestMatchers("/api/token","/api/login","/api/signup").permitAll()
+                .requestMatchers("/api/token", "/api/login", "/api/signup").permitAll()
                 .requestMatchers("/**").authenticated()
                 .anyRequest().permitAll();
 
@@ -60,11 +66,9 @@ public class SecurityConfig {
 //                .userService(oAuth2UserCustomService);
 
 
-
         http.exceptionHandling()
                 .defaultAuthenticationEntryPointFor(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
                         new AntPathRequestMatcher("/**"));
-
 
         return http.build();
     }
@@ -79,9 +83,8 @@ public class SecurityConfig {
 //        );
 //    }
 
-    @Bean
-    public TokenAuthenticationFilter tokenAuthenticationFilter() {
-        return new TokenAuthenticationFilter(jwtTokenProvider,redisTemplate);
+    private TokenAuthenticationFilter tokenAuthenticationFilter(final JwtTokenProvider jwtTokenProvider, final AuthenticationManager authenticationManager) {
+        return new TokenAuthenticationFilter(jwtTokenProvider, authenticationManager);
     }
 
 //    @Bean
