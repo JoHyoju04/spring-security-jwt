@@ -9,5 +9,7 @@ import lombok.Setter;
 public class ReqCreateAccessToken {
     @NotBlank
     private String refreshToken;
+    @NotBlank
+    private String accessToken;
     private String tokenType;
 }

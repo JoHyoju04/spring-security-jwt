@@ -20,7 +20,7 @@ public class TokenController {
     public ResAccessToken createNewAccessToken(
             @RequestBody @Valid ReqCreateAccessToken req
     ) {
-        String newAccessToken = tokenService.createNewAccessToken(req.getRefreshToken());
+        String newAccessToken = tokenService.createNewAccessToken(req);
 
         return ResAccessToken.of(newAccessToken, "Bearer");
     }
